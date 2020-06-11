@@ -1,17 +1,22 @@
-from PIL import Image, ImageTk
-from tkinter import Tk, BOTH, Canvas, NW, Frame, Label
+#khai báo các module cần thiết 
+from PIL import Image, ImageTk #hàm phụ trợ cho giao diện lồng ảnh trong giao diện
+from tkinter import Tk, BOTH, Canvas, NW, Frame, Label 
 from tkinter import messagebox as mbox 
-from tkinter.ttk import Frame, Button, Style
-import cv2
+from tkinter.ttk import Frame, Button, Style #hàm phụ trợ thiết kế giao diện
+import cv2 
 import numpy as np 
 
+#khai báo các biến toàn cục
+img = cv2.imread('twice.jpg')
+rows, cols, ch = img.shape
+
 class BTL(Frame):
-	def __init__(self, parent):
+	def __init__(self, parent): #hàm khởi tạo tkinter
 		Frame.__init__(self, parent)
 		self.parent = parent
 		self.initUI()
 
-	def initUI(self):
+	def initUI(self): #hàm thiết lập UI
 		self.parent.title('Bài Tập Lớn')
 		self.pack(fill = BOTH, expand = 1)
 
@@ -41,21 +46,23 @@ class BTL(Frame):
 		perspt = Button(self, text = "Perspective Transform", command = self.onPerspect)
 		perspt.grid(row = 5, column = 0)
 		perspt.place(x = 142, y = 170)
+		applic = Button(self, text = "Application", command = self.onApply)
+		applic.grid(row = 5, column = 0)
+		applic.place(x = 170, y = 200)
 		exit11 = Button(self, text = "Exit", command = self.onQuit)
 		exit11.grid(row = 6, column = 0)
-		exit11.place(x = 170, y = 220)
+		exit11.place(x = 170, y = 270)
 
-	def onQuit (self):
+	def onQuit (self): #hàm thoát/ dừng chương trình
 		self.quit()
 
-	def onIntro (self):
+	def onIntro (self): #hàm giới thiệu chung chung =)) mặc dù hong biết cần hong nữa
 		mbox.showinfo("Hello everyone!!!", "Đây là bài tập lớn của nhóm mình")
 
-	def nothing (x, event = None):
+	def nothing (x, event = None): #hàm đúng theo tên là nothing =)) 
 		pass
 
-	def onResize (self):
-		img = cv2.imread('myclass.JPG')
+	def onResize (self): #hàm Scaling trong tài liệu
 		im = img
 
 		cv2.namedWindow('Image', cv2.WINDOW_AUTOSIZE)
@@ -63,6 +70,7 @@ class BTL(Frame):
 
 		cv2.createTrackbar('x', 'Resize', 10, 20, self.nothing)	
 		cv2.createTrackbar('y', 'Resize', 10, 20, self.nothing)
+		cv2.createTrackbar('Larange', 'Resize', 0, 2, self.nothing)
 		cv2.createTrackbar('mode', 'Resize', 0, 1, self.nothing) #với 0 là chưa chạy, 1 là phóng to, 2 là thu nhỏ
 
 		while(1):
@@ -74,6 +82,14 @@ class BTL(Frame):
 
 			Ox = cv2.getTrackbarPos ('x', 'Resize')
 			Oy = cv2.getTrackbarPos ('y', 'Resize')
+			b = cv2.getTrackbarPos ('Larange', 'Resize')
+			if b == 0:
+				b = cv2.INTER_AREA
+			if b == 1:
+				b = cv2.INTER_CUBIC
+			if b == 2:
+				b = cv2.INTER_LINEAR
+
 			M1 = cv2.getTrackbarPos ('mode', 'Resize')
 
 			Ox = Ox/10
@@ -88,13 +104,11 @@ class BTL(Frame):
 			if M1 == 0:
 				self.nothing
 			if M1 == 1:
-				im = cv2.resize(img, None, fx = Ox, fy = Oy, interpolation = cv2.INTER_LINEAR)
+				im = cv2.resize(img, None, fx = Ox, fy = Oy, interpolation = b)
 		cv2.destroyAllWindows()
 
-	def onTranslation (self):
-		img = cv2.imread('Capture.JPG')
+	def onTranslation (self): #hàm translation
 		im = img
-		rows, cols, ch = img.shape
 
 		cv2.namedWindow('Image', cv2.WINDOW_NORMAL)
 		cv2.namedWindow('Translation', cv2.WINDOW_AUTOSIZE)
@@ -146,15 +160,16 @@ class BTL(Frame):
 				im = cv2.warpAffine (img, M, (cols, rows))
 		cv2.destroyAllWindows()
 
-	def onRotate (self):
-		img = cv2.imread('Capture.JPG')
+	def onRotate (self): #hàm Rotate
 		im = img
-		rows, cols, ch = img.shape
 
 		cv2.namedWindow('Image', cv2.WINDOW_NORMAL)
 		cv2.namedWindow('Rotate', cv2.WINDOW_AUTOSIZE)
 
 		cv2.createTrackbar('alpha', 'Rotate', 360, 720, self.nothing)
+		cv2.createTrackbar('Width', 'Rotate', int(cols/2), cols, self.nothing)
+		cv2.createTrackbar('Height', 'Rotate', int(rows/2), rows, self.nothing)
+		cv2.createTrackbar('Zoom', 'Rotate', 10, 20, self.nothing)
 		cv2.createTrackbar('switch', 'Rotate', 0, 1, self.nothing)
 
 		while(1):
@@ -165,11 +180,17 @@ class BTL(Frame):
 				break
 
 			a = cv2.getTrackbarPos ('alpha', 'Rotate')
+			b = cv2.getTrackbarPos ('Zoom', 'Rotate')
+			c = cv2.getTrackbarPos ('width', 'Rotate')
+			d = cv2.getTrackbarPos ('height', 'Rotate')
 			s = cv2.getTrackbarPos ('switch','Rotate')
 
 			a = a - 360
+			b = b / 10
+			if b == 0:
+				b = 1/10
 
-			M1 = cv2.getRotationMatrix2D ((cols/2, rows/2), a, 1)# hệ số cuối là hệ số zoom
+			M1 = cv2.getRotationMatrix2D ((c, d), a, b)# hệ số cuối là hệ số zoom
 
 			if s == 0:
 				self.nothing
@@ -178,10 +199,8 @@ class BTL(Frame):
 				im = cv2.warpAffine (img, M1, (cols, rows))
 		cv2.destroyAllWindows()
 
-	def onAffine (self):
-		img = cv2.imread('Capture.JPG')
+	def onAffine (self): #hàm Afine
 		im = img
-		rows, cols, ch = img.shape
 
 		cv2.namedWindow('Image', cv2.WINDOW_NORMAL)
 		cv2.namedWindow('Affine', cv2.WINDOW_NORMAL)
@@ -207,7 +226,6 @@ class BTL(Frame):
 
 		while(1):
 			cv2.imshow("Image", im)
-			cv2.imshow('Real', img)
 
 			k = cv2.waitKey(1) & 0xFF
 			if k == 27: 
@@ -248,7 +266,6 @@ class BTL(Frame):
 		cv2.destroyAllWindows()
 
 	def onPerspect (self):
-		img = cv2.imread('Capture.JPG')
 		im = img
 
 		cv2.namedWindow('Image', cv2.WINDOW_NORMAL)
@@ -318,6 +335,46 @@ class BTL(Frame):
 			if s == 1:
 				im = cv2.warpPerspective (img, M, (i1, i2))
 
+		cv2.destroyAllWindows()
+
+	def onApply (self):
+		# cv2.namedWindow('N', cv2.WINDOW_AUTOSIZE)
+		cv2.namedWindow('Real', cv2.WINDOW_NORMAL)
+		cv2.namedWindow('Face', cv2.WINDOW_NORMAL)
+
+		face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
+		faces = face_cascade.detectMultiScale(img, scaleFactor = 1.382, minNeighbors = 5, minSize = (30, 30))
+		number = len(faces)
+
+		im = np.zeros((300, 300, 3), np.uint8)
+
+		cv2.createTrackbar('Faces', 'Face', 0, number - 1, self.nothing) 
+		cv2.createTrackbar('Switch', 'Face', 0, 1, self.nothing) 
+
+		while(1):
+
+			i = cv2.getTrackbarPos ('Faces', 'Face')
+			s = cv2.getTrackbarPos ('Switch', 'Face')
+
+			if s == 0:
+				self.nothing
+			if s == 1:
+				x, y, w, h = faces[i] 
+
+				pts3 = np.float32([[x, y], [x + w, y], [x, y + h], [x + w, y + h]])
+				pts4 = np.float32([[0, 0], [w, 0], [0, h], [w, h]])
+				M = cv2.getPerspectiveTransform (pts3, pts4)
+
+				im = cv2.warpPerspective (img, M, (w, h))
+			
+			cv2.imshow("Face", im)
+			cv2.imshow('Real', img)
+
+
+			k = cv2.waitKey(1) & 0xFF
+			if k == 27: 
+				break
+			
 		cv2.destroyAllWindows()
 
 root = Tk()
