@@ -37,21 +37,27 @@ class BTL(Frame):
 		transl = Button(self, text = "Translation", command = self.onTranslation)
 		transl.grid(row = 2, column = 0)
 		transl.place(x = 170, y = 80)
+		reflec = Button(self, text = "Reflect", command = self.onReflect)
+		reflec.grid(row = 3, column = 0)
+		reflec.place(x = 170, y = 110)
 		rotate = Button(self, text = "Rotate", command = self.onRotate)
 		rotate.grid(row = 3, column = 0)
-		rotate.place(x = 170, y = 110)
+		rotate.place(x = 170, y = 140)
 		affine = Button(self, text = "Affine Transform", command = self.onAffine)
 		affine.grid(row = 4, column = 0)
-		affine.place(x = 157, y = 140)
+		affine.place(x = 157, y = 170)
 		perspt = Button(self, text = "Perspective Transform", command = self.onPerspect)
 		perspt.grid(row = 5, column = 0)
-		perspt.place(x = 142, y = 170)
+		perspt.place(x = 142, y = 200)
 		applic = Button(self, text = "Application", command = self.onApply)
 		applic.grid(row = 5, column = 0)
-		applic.place(x = 170, y = 200)
+		applic.place(x = 170, y = 230)
+		appli1 = Button(self, text = "Application Video", command = self.onApply1)
+		appli1.grid(row = 5, column = 0)
+		appli1.place(x = 150, y = 260)
 		exit11 = Button(self, text = "Exit", command = self.onQuit)
 		exit11.grid(row = 6, column = 0)
-		exit11.place(x = 170, y = 270)
+		exit11.place(x = 170, y = 300)
 
 	def onQuit (self): #hàm thoát/ dừng chương trình
 		self.quit()
@@ -338,11 +344,12 @@ class BTL(Frame):
 		cv2.destroyAllWindows()
 
 	def onApply (self):
+		# cv2.namedWindow('N', cv2.WINDOW_AUTOSIZE)
 		cv2.namedWindow('Real', cv2.WINDOW_NORMAL)
 		cv2.namedWindow('Face', cv2.WINDOW_NORMAL)
 
 		face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
-		faces = face_cascade.detectMultiScale(img, scaleFactor = 1.337, minNeighbors = 6, minSize = (30, 30))
+		faces = face_cascade.detectMultiScale(img, scaleFactor = 1.382, minNeighbors = 5, minSize = (30, 30))
 		number = len(faces)
 
 		im = np.zeros((300, 300, 3), np.uint8)
@@ -374,6 +381,80 @@ class BTL(Frame):
 			if k == 27: 
 				break
 			
+		cv2.destroyAllWindows()
+
+	def onApply1 (self):
+		cv2.namedWindow('frame', cv2.WINDOW_NORMAL)
+		cv2.namedWindow('cut', cv2.WINDOW_NORMAL)
+
+		im_reset = np.zeros((300, 300, 3), np.uint8)
+
+		cap = cv2.VideoCapture(0)
+
+		while(1):
+			# Take each frame
+			_, frame = cap.read()
+
+			face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
+			faces = face_cascade.detectMultiScale(frame, scaleFactor = 1.3, minNeighbors = 7, minSize = (30, 30))
+
+			number = len(faces)
+
+			if number == 0:
+				im = im_reset 
+				cv2.imshow('cut', im)
+
+			if number != 0: 
+				for x, y, w, h in faces:
+					cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 4)
+
+				for i in range (len(faces)):
+					x, y, w, h = faces[i]
+					pts3 = np.float32([[x, y], [x + w, y], [x, y + h], [x + w, y + h]])
+					pts4 = np.float32([[0, 0], [w, 0], [0, h], [w, h]])
+					M = cv2.getPerspectiveTransform (pts3, pts4)
+					im = cv2.warpPerspective (frame, M, (w, h))
+					cv2.imshow('cut', im)
+					
+			cv2.imshow('frame', frame)
+			
+
+			k = cv2.waitKey(5) & 0xFF
+			if k == 27:
+				break
+
+		cv2.destroyAllWindows()
+
+	def onReflect (self):
+		reflect = img
+		cv2.namedWindow('Image', cv2.WINDOW_NORMAL)
+		cv2.namedWindow('Reflect', cv2.WINDOW_NORMAL)
+
+		cv2.createTrackbar('up', 'Reflect', 0, rows, self.nothing) 
+		cv2.createTrackbar('down', 'Reflect', 0, rows, self.nothing) 
+		cv2.createTrackbar('left', 'Reflect', 0, cols, self.nothing) 
+		cv2.createTrackbar('right', 'Reflect', 0, cols, self.nothing) 
+
+		cv2.createTrackbar('Switch', 'Reflect', 0, 1, self.nothing) 
+
+		while(1):
+			u = cv2.getTrackbarPos('up', 'Reflect')
+			d = cv2.getTrackbarPos('down', 'Reflect')
+			l = cv2.getTrackbarPos('left', 'Reflect')
+			r = cv2.getTrackbarPos('right', 'Reflect')
+			s = cv2.getTrackbarPos('Switch', 'Reflect')
+
+			if s == 0: 
+				self.nothing
+
+			if s == 1:
+				reflect = cv2.copyMakeBorder (img, u, d, l, r , cv2.BORDER_REFLECT)
+
+			cv2.imshow('Image', reflect)
+			k = cv2.waitKey(1) & 0xFF
+			if k == 27:
+				break
+
 		cv2.destroyAllWindows()
 
 root = Tk()
