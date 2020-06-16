@@ -271,7 +271,7 @@ class BTL(Frame):
 
 		cv2.destroyAllWindows()
 
-	def onPerspect (self):
+	def onPerspect (self): #hàm biến đổi với Perspective
 		im = img
 
 		cv2.namedWindow('Image', cv2.WINDOW_NORMAL)
@@ -341,9 +341,9 @@ class BTL(Frame):
 			if s == 1:
 				im = cv2.warpPerspective (img, M, (i1, i2))
 
-		cv2.destroyAllWindows()
+		cv2.destroyAllWindows()#hàm biến đổi với Perspective
 
-	def onApply (self):
+	def onApply (self): #hàm ứng dụng trong việc cắt khuôn mặt từ một tấm ảnh gốc
 		# cv2.namedWindow('N', cv2.WINDOW_AUTOSIZE)
 		cv2.namedWindow('Real', cv2.WINDOW_NORMAL)
 		cv2.namedWindow('Face', cv2.WINDOW_NORMAL)
@@ -383,7 +383,7 @@ class BTL(Frame):
 			
 		cv2.destroyAllWindows()
 
-	def onApply1 (self):
+	def onApply1 (self): #hàm ứng dụng trong việc cắt khuôn mặt từ video
 		cv2.namedWindow('frame', cv2.WINDOW_NORMAL)
 		cv2.namedWindow('cut', cv2.WINDOW_NORMAL)
 
@@ -425,7 +425,7 @@ class BTL(Frame):
 
 		cv2.destroyAllWindows()
 
-	def onReflect (self):
+	def onReflect (self):#hàm biến đổi ảnh theo Reflect
 		reflect = img
 		cv2.namedWindow('Image', cv2.WINDOW_NORMAL)
 		cv2.namedWindow('Reflect', cv2.WINDOW_NORMAL)
